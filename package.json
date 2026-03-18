@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "concurrently \"cd Backend && python app.py\" \"cd AI-marketing-ui && npm run dev\""
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
