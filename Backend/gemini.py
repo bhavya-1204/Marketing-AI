@@ -5,6 +5,9 @@ from io import BytesIO
 import os
 import uuid
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Client automatically reads GOOGLE_API_KEY
 client = genai.Client()
 
@@ -20,17 +23,16 @@ def generate_image(prompt):
         )
 
         image_bytes = response.generated_images[0].image.image_bytes
-        image = Image.open(BytesIO(image_bytes))
+        image       = Image.open(BytesIO(image_bytes))
 
         os.makedirs("static", exist_ok=True)
-
         image_path = f"static/{uuid.uuid4()}.png"
         image.save(image_path)
 
         return image_path
 
     except Exception as e:
-        print(f"Error generating image: {e}")
+        print(f"❌ Image generation error: {type(e).__name__}: {e}")  # ✅ shows exact error
         return None
 
 
