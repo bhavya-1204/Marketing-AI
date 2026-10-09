@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 function ImageGenerator() {
 
   const [product, setProduct] = useState("");
@@ -54,11 +56,13 @@ function ImageGenerator() {
       formData.append("description", description);
       formData.append("shop_logo",   shopLogo || ""); // ✅ Include shop logo in form data
 
-      const response = await fetch("http://localhost:5000/", { method: "POST", body: formData });
+      // const response = await fetch("http://localhost:5000/", { method: "POST", body: formData });
+      const response = await fetch(`${API_URL}/`, { method: "POST", body: formData });
       const data = await response.json();
 
       if (data.image_url) {
-        const fullUrl = `http://localhost:5000/${data.image_url}`;
+        // const fullUrl = `http://localhost:5000/${data.image_url}`;
+        const fullUrl = data.image_url; // data URL from backend
         setImageUrl(fullUrl);
         saveToHistory(fullUrl, data.caption); // ✅ Save full URL to history
       }

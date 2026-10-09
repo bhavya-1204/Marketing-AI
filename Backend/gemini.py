@@ -3,7 +3,8 @@ from google.genai import types
 from PIL import Image
 from io import BytesIO
 import os
-import uuid
+# import uuid
+import base64
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -23,13 +24,10 @@ def generate_image(prompt):
         )
 
         image_bytes = response.generated_images[0].image.image_bytes
-        image       = Image.open(BytesIO(image_bytes))
-
-        os.makedirs("static", exist_ok=True)
-        image_path = f"static/{uuid.uuid4()}.png"
-        image.save(image_path)
-
-        return image_path
+        
+        # Vercel's filesystem is read-only, so return the image inline as a data URL
+        encoded = base64.b64encode(image_bytes).decode("utf-8")
+        return f"data:image/png;base64,{encoded}"
 
     except Exception as e:
         print(f"❌ Image generation error: {type(e).__name__}: {e}")  # ✅ shows exact error
