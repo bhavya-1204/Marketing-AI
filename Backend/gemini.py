@@ -1,37 +1,65 @@
-from google import genai
-from google.genai import types
-from PIL import Image
-from io import BytesIO
 import os
-# import uuid
 import base64
-
-from dotenv import load_dotenv
-load_dotenv()
-
-# Client automatically reads GOOGLE_API_KEY
-client = genai.Client()
-
+from io import BytesIO
+from huggingface_hub import InferenceClient
+ 
+# HF_TOKEN is read from environment variables (set it in Vercel project settings)
+client = InferenceClient(
+    provider="fal-ai",
+    api_key=os.environ.get("HF_TOKEN"),
+)
+ 
 def generate_image(prompt):
     try:
-        response = client.models.generate_images(
-            model="imagen-4.0-generate-001",
-            prompt=prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=1,
-                aspect_ratio="1:1"
-            )
+        image = client.text_to_image(
+            prompt,
+            model="stabilityai/stable-diffusion-3.5-large",
         )
-
-        image_bytes = response.generated_images[0].image.image_bytes
-        
-        # Vercel's filesystem is read-only, so return the image inline as a data URL
-        encoded = base64.b64encode(image_bytes).decode("utf-8")
+ 
+        # Vercel's filesystem is read-only, so return the image inline as a base64 data URL
+        buffer = BytesIO()
+        image.save(buffer, format="PNG")
+        encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
         return f"data:image/png;base64,{encoded}"
-
+ 
     except Exception as e:
-        print(f"❌ Image generation error: {type(e).__name__}: {e}")  # ✅ shows exact error
+        print(f"Image generation error: {type(e).__name__}: {e}")
         return None
+
+# from google import genai
+# from google.genai import types
+# from PIL import Image
+# from io import BytesIO
+# import os
+# # import uuid
+# import base64
+
+# from dotenv import load_dotenv
+# load_dotenv()
+
+# # Client automatically reads GOOGLE_API_KEY
+# client = genai.Client()
+
+# def generate_image(prompt):
+#     try:
+#         response = client.models.generate_images(
+#             model="imagen-4.0-generate-001",
+#             prompt=prompt,
+#             config=types.GenerateImagesConfig(
+#                 number_of_images=1,
+#                 aspect_ratio="1:1"
+#             )
+#         )
+
+#         image_bytes = response.generated_images[0].image.image_bytes
+        
+#         # Vercel's filesystem is read-only, so return the image inline as a data URL
+#         encoded = base64.b64encode(image_bytes).decode("utf-8")
+#         return f"data:image/png;base64,{encoded}"
+
+#     except Exception as e:
+#         print(f"❌ Image generation error: {type(e).__name__}: {e}")  # ✅ shows exact error
+#         return None
 
 
 #############################################################
